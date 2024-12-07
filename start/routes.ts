@@ -14,6 +14,7 @@ import app from '@adonisjs/core/services/app'
 import authRoute from './routes/v1/auth_route.js'
 import filesRoute from './routes/v1/files_route.js'
 import exampleRoute from './routes/v1/examples_route.js'
+import oauthClientsRoute from './routes/v1/oauth_client.js'
 
 const PATH_TRAVERSAL_REGEX = /(?:^|[\\/])\.\.(?:[\\/]|$)/
 
@@ -29,6 +30,7 @@ router
     authRoute()
     filesRoute()
     exampleRoute()
+    oauthClientsRoute()
   })
   .prefix('/api/v1')
 

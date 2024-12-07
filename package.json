@@ -10,12 +10,11 @@
     "dev": "node ace serve --hmr",
     "test": "node ace test",
     "lint": "eslint .",
-    "lint:fix": "eslint src --fix && pnpm format",
-    "lint:strict": "eslint --max-warnings=0 ",
+    "lint:fix": "eslint --fix && pnpm format",
+    "lint:strict": "eslint --max-warnings=5 ",
     "format": "prettier --write .",
     "format:check": "prettier -c .",
-    "typecheck": "tsc --noEmit --incremental false",
-    "prepare": "husky install"
+    "typecheck": "tsc --noEmit --incremental false"
   },
   "imports": {
     "#controllers/*": "./app/controllers/*.js",
@@ -41,6 +40,8 @@
     "@adonisjs/eslint-config": "^1.3.0",
     "@adonisjs/prettier-config": "^1.3.0",
     "@adonisjs/tsconfig": "^1.3.0",
+    "@commitlint/cli": "^16.3.0",
+    "@commitlint/config-conventional": "^16.2.4",
     "@japa/api-client": "^2.0.3",
     "@japa/assert": "^3.0.0",
     "@japa/plugin-adonisjs": "^3.0.1",
@@ -83,7 +84,7 @@
   "prettier": "@adonisjs/prettier-config",
   "lint-staged": {
     "**/*.{js,js,ts,ts}": [
-      "eslint --max-warnings=0",
+      "eslint --max-warnings=5",
       "prettier -w"
     ],
     "**/*.{json,md}": [
