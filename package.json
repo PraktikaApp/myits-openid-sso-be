@@ -33,7 +33,8 @@
     "#start/*": "./start/*.js",
     "#tests/*": "./tests/*.js",
     "#helpers/*": "./helpers/*.js",
-    "#config/*": "./config/*.js"
+    "#config/*": "./config/*.js",
+    "#types/*": "./types/*.js"
   },
   "devDependencies": {
     "@adonisjs/assembler": "^7.7.0",
@@ -65,8 +66,10 @@
     "@adonisjs/cors": "^2.2.1",
     "@adonisjs/lucid": "^21.1.0",
     "@adonisjs/mail": "^9.2.2",
+    "@types/jsonwebtoken": "^9.0.7",
     "@vinejs/vine": "^2.1.0",
     "edge.js": "^6.0.2",
+    "jsonwebtoken": "^9.0.2",
     "luxon": "^3.4.4",
     "mjml": "^4.6.3",
     "pg": "^8.12.0",

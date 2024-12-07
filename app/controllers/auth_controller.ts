@@ -15,6 +15,9 @@ export default class AuthController {
       .validate(request.all(), { messagesProvider })
 
     try {
+      if (!data.email.includes('@')) {
+        data.email = `${data.email}@student.its.ac.id`
+      }
       const user = await User.verifyCredentials(data.email, data.password)
       const token = await User.accessTokens.create(user, ['*'], { expiresIn: '1 days' })
 
