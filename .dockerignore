@@ -5,6 +5,7 @@ coverage
 .vscode
 .DS_STORE
 .env
+.env.production
 tmp
 
 # Additional .gitignore ignores (any custom file you wish)
