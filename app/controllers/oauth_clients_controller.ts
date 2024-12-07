@@ -25,7 +25,7 @@ export default class OauthClientsController {
 
   async show({ params, response }: HttpContext) {
     try {
-      const oauthClient = await OauthClient.findOrFail(params.name)
+      const oauthClient = await OauthClient.query().where('name', params.name).first()
       if (!oauthClient) {
         return response.notFound({
           success: false,
@@ -71,6 +71,59 @@ export default class OauthClientsController {
       return response.internalServerError({
         success: false,
         message: 'Failed to create oauth client.',
+        error: error.message,
+      })
+    }
+  }
+
+  async update({ params, request, response }: HttpContext) {
+    const data = await vine
+      .compile(OauthClientValidator.createSchema)
+      .validate(request.all(), { messagesProvider })
+
+    try {
+      const oauthClient = await OauthClient.query().where('name', params.name).first()
+      if (!oauthClient) {
+        return response.notFound({
+          success: false,
+          message: 'Oauth client not found.',
+        })
+      }
+
+      await oauthClient.merge(data).save()
+      return response.ok({
+        success: true,
+        message: 'Oauth client updated successfully.',
+        data: oauthClient,
+      })
+    } catch (error) {
+      return response.internalServerError({
+        success: false,
+        message: 'Failed to update oauth client.',
+        error: error.message,
+      })
+    }
+  }
+
+  async destroy({ params, response }: HttpContext) {
+    try {
+      const oauthClient = await OauthClient.query().where('name', params.name).first()
+      if (!oauthClient) {
+        return response.notFound({
+          success: false,
+          message: 'Oauth client not found.',
+        })
+      }
+
+      await oauthClient.delete()
+      return response.ok({
+        success: true,
+        message: 'Oauth client deleted successfully.',
+      })
+    } catch (error) {
+      return response.internalServerError({
+        success: false,
+        message: 'Failed to delete oauth client.',
         error: error.message,
       })
     }
