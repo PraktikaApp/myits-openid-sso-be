@@ -108,7 +108,7 @@ export default class OauthController {
     }
   }
 
-  async token({ request, response }: HttpContext) {
+  async token({ request, response, auth }: HttpContext) {
     const {
       grant_type: grantType,
       code,
@@ -174,8 +174,8 @@ export default class OauthController {
 
     try {
       await authCode.delete()
-      const token = await User.accessTokens.create(user, ['*'], { expiresIn: '1 days' })
-      if (!token.value!.release()) {
+      const token = await auth.use('jwt').generate(user)
+      if (!token) {
         return response.unprocessableEntity({
           success: false,
           message: 'Failed to generate access token.',
@@ -186,7 +186,7 @@ export default class OauthController {
         success: true,
         message: 'Login successful.',
         data: {
-          token: token.value!.release(),
+          token: token,
           state: authCode.state,
           nonce: authCode.nonce,
         },

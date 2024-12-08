@@ -22,6 +22,9 @@ importers:
       '@adonisjs/mail':
         specifier: ^9.2.2
         version: 9.2.2(@adonisjs/core@6.12.1(@adonisjs/assembler@7.7.0(typescript@5.4.5))(@vinejs/vine@2.1.0)(edge.js@6.0.2))(@types/luxon@3.4.2)(@types/node@20.14.9)(dayjs@1.11.11)(edge.js@6.0.2)(luxon@3.4.4)
+      '@maximemrf/adonisjs-jwt':
+        specifier: ^0.2.2
+        version: 0.2.2(@adonisjs/core@6.12.1(@adonisjs/assembler@7.7.0(typescript@5.4.5))(@vinejs/vine@2.1.0)(edge.js@6.0.2))
       '@types/jsonwebtoken':
         specifier: ^9.0.7
         version: 9.0.7
@@ -754,6 +757,15 @@ packages:
         integrity: sha512-9I2Zn6+NJLfaGoz9jN3lpwDgAYvfGeNYdbAIjJOqzs4Tpc+VU3Jqq4IofSUBKajiDS8k9fZIg18/z13mpk1bsA==,
       }
     engines: { node: '>=8' }
+
+  '@maximemrf/adonisjs-jwt@0.2.2':
+    resolution:
+      {
+        integrity: sha512-rYwMpuzSD0Iviojwm8paqSwO5giqutIvM1c5hrEBWXmJ1K3Rb8KFJhiJgwh2m5xYdSvoat9dVCRhHWJKHEgAIw==,
+      }
+    engines: { node: '>=20.6.0' }
+    peerDependencies:
+      '@adonisjs/core': ^6.2.0
 
   '@noble/hashes@1.4.0':
     resolution:
@@ -7314,6 +7326,12 @@ snapshots:
   '@jsdevtools/ono@7.1.3': {}
 
   '@lukeed/ms@2.0.2': {}
+
+  '@maximemrf/adonisjs-jwt@0.2.2(@adonisjs/core@6.12.1(@adonisjs/assembler@7.7.0(typescript@5.4.5))(@vinejs/vine@2.1.0)(edge.js@6.0.2))':
+    dependencies:
+      '@adonisjs/core': 6.12.1(@adonisjs/assembler@7.7.0(typescript@5.4.5))(@vinejs/vine@2.1.0)(edge.js@6.0.2)
+      '@types/jsonwebtoken': 9.0.7
+      jsonwebtoken: 9.0.2
 
   '@noble/hashes@1.4.0': {}
 

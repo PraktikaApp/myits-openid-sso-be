@@ -7,10 +7,9 @@ import VerifyEmailNotification from '#mails/verify_email_notification'
 import ResetPasswordNotification from '#mails/reset_password_notification'
 import AuthValidator from '#validators/auth'
 import messagesProvider from '#helpers/validation_messages_provider'
-import { UUID } from 'node:crypto'
 
 export default class AuthController {
-  async login({ request, response }: HttpContext) {
+  async login({ request, response, auth }: HttpContext) {
     const data = await vine
       .compile(AuthValidator.loginSchema)
       .validate(request.all(), { messagesProvider })
@@ -20,20 +19,9 @@ export default class AuthController {
         data.email = `${data.email}@student.its.ac.id`
       }
       const user = await User.verifyCredentials(data.email, data.password)
-      const token = await User.accessTokens.create(user, ['*'], { expiresIn: '1 days' })
+      const token = await auth.use('jwt').generate(user)
 
-      if (!token.value!.release()) {
-        return response.unprocessableEntity({
-          success: false,
-          message: 'Invalid email or password.',
-        })
-      }
-
-      return response.ok({
-        success: true,
-        message: 'Login successful.',
-        data: token.value!.release(),
-      })
+      return response.ok({ token })
     } catch (error) {
       return response.unprocessableEntity({
         success: false,
@@ -83,22 +71,6 @@ export default class AuthController {
       return response.internalServerError({
         success: false,
         message: 'Failed to retrieve user.',
-        error: error.message,
-      })
-    }
-  }
-
-  async logout({ auth, response }: HttpContext) {
-    try {
-      await User.accessTokens.delete(auth.user!, auth.user!.currentAccessToken.identifier)
-      return response.ok({
-        success: true,
-        message: 'Logged out successfully.',
-      })
-    } catch (error) {
-      return response.internalServerError({
-        success: false,
-        message: 'Logout failed.',
         error: error.message,
       })
     }

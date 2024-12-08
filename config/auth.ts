@@ -1,21 +1,32 @@
 import { defineConfig } from '@adonisjs/auth'
-import { tokensGuard, tokensUserProvider } from '@adonisjs/auth/access_tokens'
 import type { InferAuthEvents, Authenticators as AuthType } from '@adonisjs/auth/types'
+import { jwtGuard } from '@maximemrf/adonisjs-jwt/jwt_config'
+import { sessionGuard, sessionUserProvider } from '@adonisjs/auth/session'
 
 const authConfig = defineConfig({
-  default: 'api',
+  default: 'jwt',
   guards: {
-    api: tokensGuard({
-      provider: tokensUserProvider({
-        tokens: 'accessTokens',
+    web: sessionGuard({
+      useRememberMeTokens: false,
+      provider: sessionUserProvider({
         model: () => import('#models/user'),
+      }),
+    }),
+    jwt: jwtGuard({
+      tokenExpiresIn: '1h',
+      useCookies: false,
+      provider: sessionUserProvider({
+        model: () => import('#models/user'),
+      }),
+      content: (user: any) => ({
+        userId: user.getId(),
+        email: user.getOriginal().email,
       }),
     }),
   },
 })
 
 export default authConfig
-
 /**
  * Inferring types from the configured auth
  * guards.

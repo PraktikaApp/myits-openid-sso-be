@@ -15,11 +15,10 @@ export default function authRoutes() {
 
       router
         .group(() => {
-          router.post('/logout', [AuthController, 'logout'])
           router.get('/user', [AuthController, 'user'])
           router.post('/email/verify/resend', [AuthController, 'resendVerificationEmail'])
         })
-        .middleware(middleware.auth({ guards: ['api'] }))
+        .middleware(middleware.auth({ guards: ['jwt'] }))
     })
     .prefix('/auth')
 }

@@ -12,7 +12,6 @@ import { HttpContext } from '@adonisjs/core/http'
 import { sep, normalize } from 'node:path'
 import app from '@adonisjs/core/services/app'
 import authRoute from './routes/v1/auth_route.js'
-import filesRoute from './routes/v1/files_route.js'
 import oauthClientsRoute from './routes/v1/oauth_client.js'
 import oauthRoute from './routes/v1/oauth.js'
 import userProfileRoute from './routes/v1/profile_route.js'
@@ -29,7 +28,6 @@ router.get('/', async ({ response }: HttpContext) => {
 router
   .group(() => {
     authRoute()
-    filesRoute()
     oauthRoute()
     oauthClientsRoute()
     userProfileRoute()

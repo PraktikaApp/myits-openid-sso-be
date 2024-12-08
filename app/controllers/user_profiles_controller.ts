@@ -7,7 +7,7 @@ import messagesProvider from '#helpers/validation_messages_provider'
 export default class UserProfilesController {
   async store({ auth, request, response }: HttpContext) {
     const user = await auth.authenticate()
-    const userId = user.currentAccessToken.tokenableId
+    const userId = user.id
 
     const data = await vine
       .compile(UserProfileValidator.createSchema)
