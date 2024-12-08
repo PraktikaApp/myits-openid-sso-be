@@ -1,0 +1,30 @@
+sequenceDiagram
+    participant U as User
+    participant C as Client App
+    participant S as OpenID Server
+    participant DB as Database
+    
+    U->>C: Click Login
+    C->>S: GET /authorize with params:<br/>client_id, redirect_uri, response_type=code,<br/>scope, state, nonce
+    S->>DB: Validate client_id & redirect_uri
+    S->>S: Check user token
+    S->>DB: Generate & store auth_code
+    S->>C: Return auth_code & state
+    C->>S: POST /token with:<br/>auth_code, client_id, client_secret
+    S->>DB: Validate auth_code & credentials
+    S->>S: Generate tokens (ID & Access)
+    S->>C: Return tokens
+    C->>S: GET /userinfo with access_token
+    S->>DB: Get user data
+    S->>C: Return user info
+
+sequenceDiagram
+    participant C as Client App Developer
+    participant S as OpenID Server
+    participant DB as Database
+    
+    C->>S: POST /clients with developer credentials
+    S->>S: Validate developer token
+    S->>DB: Generate client_id and client_secret
+    S->>DB: Store client data
+    S->>C: Return client_id and client_secret

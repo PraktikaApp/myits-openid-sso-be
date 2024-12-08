@@ -3,7 +3,8 @@ import OauthClient from '#models/oauth_client'
 import vine from '@vinejs/vine'
 import OauthClientValidator from '#validators/oauth_client'
 import messagesProvider from '#helpers/validation_messages_provider'
-import { generateUniqueClientId, generateRandomString } from '#helpers/random_string_generator'
+import { v4 as uuidv4 } from 'uuid'
+import hash from '@adonisjs/core/services/hash'
 
 export default class OauthClientsController {
   async index({ response }: HttpContext) {
@@ -53,15 +54,14 @@ export default class OauthClientsController {
       .validate(request.all(), { messagesProvider })
 
     try {
-      const generatedClientIds = new Set<string>()
-
-      const clientId = generateUniqueClientId(10, generatedClientIds)
-      const clientSecret = generateRandomString(16)
+      const clientId = uuidv4()
+      const clientSecret = await hash.use('scrypt').make(clientId)
       const oauthClient = await OauthClient.create({
         ...data,
         client_id: clientId,
         client_secret: clientSecret,
       })
+
       return response.created({
         success: true,
         message: 'Oauth client created successfully.',
@@ -90,7 +90,15 @@ export default class OauthClientsController {
         })
       }
 
-      await oauthClient.merge(data).save()
+      const clientId = uuidv4()
+      const clientSecret = await hash.use('scrypt').make(clientId)
+      await oauthClient
+        .merge({
+          ...data,
+          client_id: clientId,
+          client_secret: clientSecret,
+        })
+        .save()
       return response.ok({
         success: true,
         message: 'Oauth client updated successfully.',

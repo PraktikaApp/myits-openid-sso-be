@@ -22,7 +22,7 @@ services:
 
   myits-db:
     image: postgres:16
-    container_name: postgres
+    container_name: myits-postgres
     environment:
       POSTGRES_USER: ${DB_USER}
       POSTGRES_PASSWORD: ${DB_PASSWORD}
@@ -39,7 +39,7 @@ services:
 
   myits-adminer:
     image: adminer
-    container_name: adminer
+    container_name: myits-adminer
     ports:
       - '8080:8080'
     depends_on:

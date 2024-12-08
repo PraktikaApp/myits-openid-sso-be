@@ -5,8 +5,8 @@ import User from '#models/user'
 import AuthCode from '#models/auth_code'
 import OauthClient from '#models/oauth_client'
 import AuthValidator from '#validators/auth'
+import { v4 as uuidv4 } from 'uuid'
 import messagesProvider from '#helpers/validation_messages_provider'
-import { generateRandomString } from '#helpers/random_string_generator'
 
 export default class OauthController {
   private validateScopes(requestedScopes: string, allowedScopes: string[]): string[] | null {
@@ -81,7 +81,7 @@ export default class OauthController {
       }
 
       const authCode = await AuthCode.create({
-        code: generateRandomString(32),
+        code: uuidv4(),
         clientId: oauthClient.client_id,
         userId: user.id,
         scopes: scope,

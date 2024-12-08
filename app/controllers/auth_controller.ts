@@ -7,6 +7,7 @@ import VerifyEmailNotification from '#mails/verify_email_notification'
 import ResetPasswordNotification from '#mails/reset_password_notification'
 import AuthValidator from '#validators/auth'
 import messagesProvider from '#helpers/validation_messages_provider'
+import { UUID } from 'node:crypto'
 
 export default class AuthController {
   async login({ request, response }: HttpContext) {
