@@ -4,7 +4,6 @@ import vine from '@vinejs/vine'
 import OauthClientValidator from '#validators/oauth_client'
 import messagesProvider from '#helpers/validation_messages_provider'
 import { v4 as uuidv4 } from 'uuid'
-import hash from '@adonisjs/core/services/hash'
 
 export default class OauthClientsController {
   async index({ response }: HttpContext) {
@@ -55,7 +54,7 @@ export default class OauthClientsController {
 
     try {
       const clientId = uuidv4()
-      const clientSecret = await hash.use('scrypt').make(clientId)
+      const clientSecret = uuidv4()
       const oauthClient = await OauthClient.create({
         ...data,
         client_id: clientId,
@@ -91,7 +90,7 @@ export default class OauthClientsController {
       }
 
       const clientId = uuidv4()
-      const clientSecret = await hash.use('scrypt').make(clientId)
+      const clientSecret = uuidv4()
       await oauthClient
         .merge({
           ...data,
