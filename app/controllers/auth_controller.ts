@@ -32,6 +32,7 @@ export default class AuthController {
   }
 
   async register({ request, response }: HttpContext) {
+    console.log('Registering...')
     const data = await vine
       .compile(AuthValidator.registerSchema)
       .validate(request.all(), { messagesProvider })

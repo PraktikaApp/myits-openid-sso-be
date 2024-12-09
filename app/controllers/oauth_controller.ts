@@ -20,10 +20,16 @@ export default class OauthController {
     const oauthClient = await OauthClient.findBy('client_id', clientId)
     if (!oauthClient) return null
 
+    console.log('Oauth client found:', oauthClient.client_id)
+
     const allowedScopes = oauthClient.allowed_scopes.split(',').map((s) => s.trim())
     const validScopes = this.validateScopes(scopes, allowedScopes)
     if (!validScopes) return null
+    console.log('Valid scopes:', validScopes)
 
+    if (!oauthClient.redirect_uri.startsWith('http')) {
+      return null
+    }
     const allowedUri = new URL(oauthClient.redirect_uri)
     const requestedUri = new URL(redirectUri)
     if (
@@ -32,6 +38,7 @@ export default class OauthController {
     ) {
       return null
     }
+    console.log('Valid redirect_uri:', redirectUri)
     return oauthClient
   }
 
@@ -44,8 +51,10 @@ export default class OauthController {
       state,
       nonce,
     } = request.qs()
+    console.log('Authorize request:', request.qs())
 
     if (!clientId || !redirectUri || !scope || !state) {
+      console.log('Missing required parameters.')
       return response.unprocessableEntity({
         success: false,
         message: 'Missing required parameters.',
@@ -53,6 +62,7 @@ export default class OauthController {
     }
 
     if (responseType !== 'code') {
+      console.log("Invalid response_type. Only 'code' is allowed.")
       return response.unauthorized({
         success: false,
         message: 'Invalid response_type. Only "code" is allowed.',
@@ -60,12 +70,17 @@ export default class OauthController {
     }
 
     const oauthClient = await this.validateOauthClient(clientId, scope, redirectUri)
+    console.log('Oauth client:', oauthClient)
+
     if (!oauthClient) {
+      console.log('Invalid client_id, scope, or redirect_uri.')
       return response.unauthorized({
         success: false,
         message: 'Invalid client_id, scope, or redirect_uri.',
       })
     }
+
+    console.log('Valid client_id, scope, and redirect_uri.')
 
     try {
       const data = await vine
@@ -73,13 +88,15 @@ export default class OauthController {
         .validate(request.all(), { messagesProvider })
 
       const user = await User.verifyCredentials(data.email, data.password)
+      console.log('User found:', user.email)
       if (!user) {
+        console.log('User not found:', data.email)
         return response.unauthorized({
           success: false,
           message: 'Invalid email or password.',
         })
       }
-
+      console.log('User found:', user.email)
       const authCode = await AuthCode.create({
         code: uuidv4(),
         clientId: oauthClient.client_id,
@@ -91,12 +108,13 @@ export default class OauthController {
         expiresAt: DateTime.utc().plus({ minutes: 5 }),
       })
 
+      console.log('Authorization code generated:', authCode.code)
+
       return response.ok({
         success: true,
         message: 'Authorization code generated successfully.',
         data: {
-          code: authCode.code,
-          state: state,
+          uri: `${redirectUri}?code=${authCode.code}&state=${state}`,
         },
       })
     } catch (error) {
