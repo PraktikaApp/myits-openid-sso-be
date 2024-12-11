@@ -9,30 +9,7 @@ import AuthValidator from '#validators/auth'
 import messagesProvider from '#helpers/validation_messages_provider'
 
 export default class AuthController {
-  async login({ request, response, auth }: HttpContext) {
-    const data = await vine
-      .compile(AuthValidator.loginSchema)
-      .validate(request.all(), { messagesProvider })
-
-    try {
-      if (!data.email.includes('@')) {
-        data.email = `${data.email}@student.its.ac.id`
-      }
-      const user = await User.verifyCredentials(data.email, data.password)
-      const token = await auth.use('jwt').generate(user)
-
-      return response.ok({ token })
-    } catch (error) {
-      return response.unprocessableEntity({
-        success: false,
-        message: 'Invalid email or password.',
-        error: error.message,
-      })
-    }
-  }
-
   async register({ request, response }: HttpContext) {
-    console.log('Registering...')
     const data = await vine
       .compile(AuthValidator.registerSchema)
       .validate(request.all(), { messagesProvider })

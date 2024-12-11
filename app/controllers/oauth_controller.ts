@@ -130,12 +130,12 @@ export default class OauthController {
     const {
       grant_type: grantType,
       code,
-      redirect_uri: redirectUri,
       client_id: clientId,
       client_secret: clientSecret,
     } = request.qs()
 
-    if (!grantType || !code || !redirectUri || !clientId || !clientSecret) {
+    console.log('Token request:', request.qs())
+    if (!grantType || !code || !clientId || !clientSecret) {
       return response.unprocessableEntity({
         success: false,
         message: 'Missing required parameters.',
@@ -149,6 +149,8 @@ export default class OauthController {
       })
     }
 
+    console.log('Valid grant_type:', grantType)
+
     const oauthClient = await OauthClient.findBy('client_id', clientId)
     if (!oauthClient || oauthClient.client_secret !== clientSecret) {
       return response.unauthorized({
@@ -157,13 +159,18 @@ export default class OauthController {
       })
     }
 
+    console.log('Valid client_id and client_secret.')
+
     const authCode = await AuthCode.findBy('code', code)
-    if (!authCode || authCode.clientId !== clientId || authCode.redirectUri !== redirectUri) {
+    console.log('Authorization code:', authCode)
+    if (!authCode || authCode.clientId !== clientId) {
       return response.unauthorized({
         success: false,
         message: 'Invalid authorization code.',
       })
     }
+
+    console.log('Valid authorization code:', authCode.code)
 
     if (authCode.expiresAt <= DateTime.utc()) {
       await authCode.delete()
@@ -172,27 +179,21 @@ export default class OauthController {
         message: 'Authorization code has expired.',
       })
     }
-
-    const allowedScopes = oauthClient.allowed_scopes.split(',').map((s) => s.trim())
-    const validScopes = this.validateScopes(authCode.scopes, allowedScopes)
-    if (!validScopes) {
-      return response.unauthorized({
-        success: false,
-        message: 'Invalid scope.',
-      })
-    }
-
+    console.log('Authorization code has not expired.')
     const user = await User.find(authCode.userId)
+    console.log('User:', user)
     if (!user) {
       return response.unauthorized({
         success: false,
         message: 'Invalid user.',
       })
     }
+    console.log('User found:', user.email)
 
     try {
       await authCode.delete()
       const token = await auth.use('jwt').generate(user)
+      console.log('Access token generated:', token)
       if (!token) {
         return response.unprocessableEntity({
           success: false,
@@ -213,6 +214,23 @@ export default class OauthController {
       return response.internalServerError({
         success: false,
         message: 'Failed to generate token.',
+        error: error.message,
+      })
+    }
+  }
+
+  async me({ auth, response }: HttpContext) {
+    try {
+      const userData = await auth.use('jwt').authenticate()
+      return response.ok({
+        valid: true,
+        user: userData,
+        message: 'Token is valid',
+      })
+    } catch (error) {
+      return response.unauthorized({
+        valid: false,
+        message: 'Invalid token',
         error: error.message,
       })
     }

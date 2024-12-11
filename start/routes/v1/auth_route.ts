@@ -5,7 +5,6 @@ import router from '@adonisjs/core/services/router'
 export default function authRoutes() {
   router
     .group(() => {
-      router.post('/login', [AuthController, 'login'])
       router.post('/register', [AuthController, 'register'])
       router.get('/email/verify/:email/:id', [AuthController, 'verifyEmail']).as('verifyEmail')
       router.post('/password/forgot', [AuthController, 'forgotPassword'])
