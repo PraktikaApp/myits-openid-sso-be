@@ -20,12 +20,9 @@ export default class OauthController {
     const oauthClient = await OauthClient.findBy('client_id', clientId)
     if (!oauthClient) return null
 
-    console.log('Oauth client found:', oauthClient.client_id)
-
     const allowedScopes = oauthClient.allowed_scopes.split(',').map((s) => s.trim())
     const validScopes = this.validateScopes(scopes, allowedScopes)
     if (!validScopes) return null
-    console.log('Valid scopes:', validScopes)
 
     if (!oauthClient.redirect_uri.startsWith('http')) {
       return null
@@ -38,7 +35,6 @@ export default class OauthController {
     ) {
       return null
     }
-    console.log('Valid redirect_uri:', redirectUri)
     return oauthClient
   }
 
@@ -51,10 +47,8 @@ export default class OauthController {
       state,
       nonce,
     } = request.qs()
-    console.log('Authorize request:', request.qs())
 
     if (!clientId || !redirectUri || !scope || !state) {
-      console.log('Missing required parameters.')
       return response.unprocessableEntity({
         success: false,
         message: 'Missing required parameters.',
@@ -62,7 +56,6 @@ export default class OauthController {
     }
 
     if (responseType !== 'code') {
-      console.log("Invalid response_type. Only 'code' is allowed.")
       return response.unauthorized({
         success: false,
         message: 'Invalid response_type. Only "code" is allowed.',
@@ -70,17 +63,13 @@ export default class OauthController {
     }
 
     const oauthClient = await this.validateOauthClient(clientId, scope, redirectUri)
-    console.log('Oauth client:', oauthClient)
 
     if (!oauthClient) {
-      console.log('Invalid client_id, scope, or redirect_uri.')
       return response.unauthorized({
         success: false,
         message: 'Invalid client_id, scope, or redirect_uri.',
       })
     }
-
-    console.log('Valid client_id, scope, and redirect_uri.')
 
     try {
       const data = await vine
@@ -88,15 +77,12 @@ export default class OauthController {
         .validate(request.all(), { messagesProvider })
 
       const user = await User.verifyCredentials(data.email, data.password)
-      console.log('User found:', user.email)
       if (!user) {
-        console.log('User not found:', data.email)
         return response.unauthorized({
           success: false,
           message: 'Invalid email or password.',
         })
       }
-      console.log('User found:', user.email)
       const authCode = await AuthCode.create({
         code: uuidv4(),
         clientId: oauthClient.client_id,
@@ -107,8 +93,6 @@ export default class OauthController {
         redirectUri: redirectUri,
         expiresAt: DateTime.utc().plus({ minutes: 5 }),
       })
-
-      console.log('Authorization code generated:', authCode.code)
 
       return response.ok({
         success: true,
@@ -134,7 +118,6 @@ export default class OauthController {
       client_secret: clientSecret,
     } = request.qs()
 
-    console.log('Token request:', request.qs())
     if (!grantType || !code || !clientId || !clientSecret) {
       return response.unprocessableEntity({
         success: false,
@@ -149,8 +132,6 @@ export default class OauthController {
       })
     }
 
-    console.log('Valid grant_type:', grantType)
-
     const oauthClient = await OauthClient.findBy('client_id', clientId)
     if (!oauthClient || oauthClient.client_secret !== clientSecret) {
       return response.unauthorized({
@@ -159,18 +140,13 @@ export default class OauthController {
       })
     }
 
-    console.log('Valid client_id and client_secret.')
-
     const authCode = await AuthCode.findBy('code', code)
-    console.log('Authorization code:', authCode)
     if (!authCode || authCode.clientId !== clientId) {
       return response.unauthorized({
         success: false,
         message: 'Invalid authorization code.',
       })
     }
-
-    console.log('Valid authorization code:', authCode.code)
 
     if (authCode.expiresAt <= DateTime.utc()) {
       await authCode.delete()
@@ -179,21 +155,17 @@ export default class OauthController {
         message: 'Authorization code has expired.',
       })
     }
-    console.log('Authorization code has not expired.')
     const user = await User.find(authCode.userId)
-    console.log('User:', user)
     if (!user) {
       return response.unauthorized({
         success: false,
         message: 'Invalid user.',
       })
     }
-    console.log('User found:', user.email)
 
     try {
       await authCode.delete()
       const token = await auth.use('jwt').generate(user)
-      console.log('Access token generated:', token)
       if (!token) {
         return response.unprocessableEntity({
           success: false,
